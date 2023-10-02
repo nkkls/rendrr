@@ -9,6 +9,9 @@ if you are the one behind it, hello! nice to meet you!
 ## don't you have like 10 other projects on hand? what about stupid-editor
 i forgot why i made that, and i honestly got burned out trying to build macrobar
 
+## this looks kinda cool, can i see?
+Naah this looks like crap lmao
+[!awesome teapot](/screenshots/teapot.png)
 ## and as always,
 made with love and hate; by nth.
 
