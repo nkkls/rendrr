@@ -11,7 +11,8 @@ i forgot why i made that, and i honestly got burned out trying to build macrobar
 
 ## this looks kinda cool, can i see?
 Naah this looks like crap lmao
-[!awesome teapot](/screenshots/teapot.png)
+
+![awesome teapot](screenshots/teapot.png)
 ## and as always,
 made with love and hate; by nth.
 
