@@ -2,6 +2,7 @@
 
 #include <logger.h>
 #include <modelr.h>
+#include <vec.h>
 
 #include <iostream>
 #include <string>
@@ -18,33 +19,55 @@ void RenderModel(SDL_Renderer* renderer, const modelr& model, float modelShrink,
     const std::vector<std::vector<int>> faces = model.GetFaces();
     const std::vector<modelr::Vertex>& vertices = model.GetVertices();
 
+    Vec3f light_dir(0,0,1);
+
+    Vec2f screen_coords[3]; 
+    Vec3f world_coords[3]; 
+
     for (const std::vector<int>& faceIndices : faces) {
-        const modelr::Vertex& v0 = vertices[faceIndices[0] - 1];
+        const modelr::Vertex& a = vertices[faceIndices[0] - 1 ];
+        screen_coords[0] = Vec2f((((a.x + xOff) * width / modelShrink) + width / 2), ((-(a.y + yOff) * height / modelShrink) + height / 2)); 
+        world_coords[0] = Vec3f(a.x,a.y,a.z);
+
         for (size_t i = 0; i < faceIndices.size() - 1; ++i) {
-                
-            const modelr::Vertex& v1 = vertices[faceIndices[i] - 1 ]; // thank you unnick + dunkyl <3
-            const modelr::Vertex& v2 = vertices[faceIndices[i+1] - 1 ];
-                
-            float x0 = (((v0.x + xOff) * width / modelShrink) + width / 2);
-            float y0 = ((-(v0.y + yOff) * height / modelShrink) + height / 2);
-                
-            float x1 = (((v1.x + xOff) * width / modelShrink) + width / 2);
-            float y1 = ((-(v1.y + yOff) * height / modelShrink) + height / 2);
 
-            float x2 = (((v2.x + xOff) * width / modelShrink) + width / 2);
-            float y2 = ((-(v2.y + yOff) * height / modelShrink) + height / 2);
+            const modelr::Vertex& v0 = vertices[faceIndices[i] - 1 ];
+            screen_coords[1] = Vec2f((((v0.x + xOff) * width / modelShrink) + width / 2), ((-(v0.y + yOff) * height / modelShrink) + height / 2)); 
+            
+            const modelr::Vertex& v1 = vertices[faceIndices[i + 1] - 1 ];
+            screen_coords[2] = Vec2f((((v1.x + xOff) * width / modelShrink) + width / 2), ((-(v1.y + yOff) * height / modelShrink) + height / 2)); 
+        
+            world_coords[1] = Vec3f(v0.x,v0.y,v0.z);
+            world_coords[2] = Vec3f(v1.x,v1.y,v1.z);
 
-            SDL_Vertex sv0 = {{x0,y0},{255,0,0},{1,1}};
-            SDL_Vertex sv1 = {{x1,y1},{0,255,0},{1,1}};
-            SDL_Vertex sv2 = {{x2,y2},{0,0,255},{1,1}};
+            Vec3f n = (world_coords[2]-world_coords[0])^(world_coords[1]-world_coords[0]); 
+            n.normalize();
 
-            SDL_Vertex sv_vertices[] = {
-                sv0,
-                sv1,
-                sv2,
-            };
+            float intensity = n*light_dir;
+            if (intensity > 0) {
+                SDL_Vertex sv0 = {{screen_coords[0].x,screen_coords[0].y},{intensity*255},{1,1}};
+                SDL_Vertex sv1 = {{screen_coords[1].x,screen_coords[1].y},{intensity*255},{1,1}};
+                SDL_Vertex sv2 = {{screen_coords[2].x,screen_coords[2].y},{intensity*255},{1,1}};
+
+                SDL_Vertex sv_vertices[] = {
+                    sv0,
+                    sv1,
+                    sv2,
+                };
+                    
+                SDL_RenderGeometry(renderer,nullptr,sv_vertices,3,NULL,0);
+            }
+            // const modelr::Vertex& v1 = vertices[faceIndices[i] - 1 ]; // thank you unnick + dunkyl <3
+            // const modelr::Vertex& v2 = vertices[faceIndices[i+1] - 1 ];
                 
-            SDL_RenderGeometry(renderer,nullptr,sv_vertices,3,NULL,0);
+            // float x0 = (((v0.x + xOff) * width / modelShrink) + width / 2);
+            // float y0 = ((-(v0.y + yOff) * height / modelShrink) + height / 2);
+                
+            // float x1 = (((v1.x + xOff) * width / modelShrink) + width / 2);
+            // float y1 = ((-(v1.y + yOff) * height / modelShrink) + height / 2);
+
+            // float x2 = (((v2.x + xOff) * width / modelShrink) + width / 2);
+            // float y2 = ((-(v2.y + yOff) * height / modelShrink) + height / 2);
         }
     }
 }
